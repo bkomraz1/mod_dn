@@ -50,7 +50,7 @@ class JFormFieldAuthors extends JFormField
 
   //now get to the business of finding the articles
 	
-  $db = &JFactory::getDBO();
+  $db = JFactory::getDBO();
   $query = 'select if( strcmp(created_by_alias, ""), created_by_alias, #__users.name) as name from #__content, #__users where created_by=#__users.id group by 1 order by 1;';
   // $query = 'SELECT #__users.id, name FROM #__content, #__users WHERE created_by=#__users.id GROUP BY 1,2 ORDER BY 2;';
   

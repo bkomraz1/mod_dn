@@ -53,7 +53,7 @@ class JFormFieldArticles extends JFormField
 
   //now get to the business of finding the articles
 	
-  $db = &JFactory::getDBO();
+  $db = JFactory::getDBO();
   $query = 'SELECT * FROM #__categories WHERE published=1 AND extension = "com_content" ORDER BY lft;';
   
   $db->setQuery( $query );
