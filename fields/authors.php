@@ -1,6 +1,6 @@
 <?php
 // no direct access
-defined( '_JEXEC' ) or die( 'Restricted access' );
+defined('_JEXEC') or die('Restricted access');
 
 
 jimport('joomla.html.html');
@@ -13,63 +13,63 @@ jimport('joomla.form.formfield');//import the necessary class definition for for
  */
 class JFormFieldAuthors extends JFormField
 {
-	/**
-  * The form field type.
-  *
-  * @var  string
-  * @since	1.6
-  */
-	protected $type = 'Authors'; //the form field type
+    /**
+     * The form field type.
+     *
+     * @var  string
+     * @since    1.6
+     */
+    protected $type = 'Authors'; //the form field type
 
-	/**
-  * Method to get content articles
-  *
-  * @return	array	The field option objects.
-  * @since	1.6
-  */
-	protected function getInput()
-	{
-  // Initialize variables.
-  
-  $attr = '';
+    /**
+     * Method to get content articles
+     *
+     * @return    array    The field option objects.
+     * @since    1.6
+     */
+    protected function getInput()
+    {
+        // Initialize variables.
 
-  // Initialize some field attributes.
-  $attr .= $this->element['class'] ? ' class="'.(string) $this->element['class'].'"' : '';
+        $attr = '';
 
-  // To avoid user's confusion, readonly="true" should imply disabled="true".
-  if ( (string) $this->element['readonly'] == 'true' || (string) $this->element['disabled'] == 'true') {
-   $attr .= ' disabled="disabled"';
-  }
+        // Initialize some field attributes.
+        $attr .= $this->element['class'] ? ' class="' . (string)$this->element['class'] . '"' : '';
 
-  $attr .= $this->element['size'] ? ' size="'.(int) $this->element['size'].'"' : '';
-  $attr .= $this->multiple ? ' multiple="multiple"' : '';
+        // To avoid user's confusion, readonly="true" should imply disabled="true".
+        if ((string)$this->element['readonly'] == 'true' || (string)$this->element['disabled'] == 'true') {
+            $attr .= ' disabled="disabled"';
+        }
 
-  // Initialize JavaScript field attributes.
-  $attr .= $this->element['onchange'] ? ' onchange="'.(string) $this->element['onchange'].'"' : '';
-  
+        $attr .= $this->element['size'] ? ' size="' . (int)$this->element['size'] . '"' : '';
+        $attr .= $this->multiple ? ' multiple="multiple"' : '';
 
-  //now get to the business of finding the articles
-	
-  $db = JFactory::getDBO();
-  $query = 'select if( strcmp(created_by_alias, ""), created_by_alias, #__users.name) as name from #__content, #__users where created_by=#__users.id group by 1 order by 1;';
-  // $query = 'SELECT #__users.id, name FROM #__content, #__users WHERE created_by=#__users.id GROUP BY 1,2 ORDER BY 2;';
-  
-  $db->setQuery( $query );
-  $authors = $db->loadObjectList();
-  
-  $options=array();
-  
-  
-	//loop through categories 
-	foreach ($authors as $author) {
-	 $options[]=$author;
-	}   
-   
-  // Output
-  
-  return JHTML::_('select.genericlist',  $options, $this->name, trim($attr), 'name', 'name',  $this->value );
-  
-	}
+        // Initialize JavaScript field attributes.
+        $attr .= $this->element['onchange'] ? ' onchange="' . (string)$this->element['onchange'] . '"' : '';
+
+
+        //now get to the business of finding the articles
+
+        $db = JFactory::getDBO();
+        $query = 'select if( strcmp(created_by_alias, ""), created_by_alias, #__users.name) as name from #__content, #__users where created_by=#__users.id group by 1 order by 1;';
+        // $query = 'SELECT #__users.id, name FROM #__content, #__users WHERE created_by=#__users.id GROUP BY 1,2 ORDER BY 2;';
+
+        $db->setQuery($query);
+        $authors = $db->loadObjectList();
+
+        $options = array();
+
+
+        //loop through categories
+        foreach ($authors as $author) {
+            $options[] = $author;
+        }
+
+        // Output
+
+        return JHTML::_('select.genericlist', $options, $this->name, trim($attr), 'name', 'name', $this->value);
+
+    }
 }
 
 

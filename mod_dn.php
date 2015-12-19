@@ -8,13 +8,13 @@
 
 defined('_JEXEC') or die('Direct Access to this location is not allowed.');
 
-require_once (dirname(__FILE__).'/helper.php');
+require_once(dirname(__FILE__) . '/helper.php');
 
 global $modDisplayNewsHelperRuns;
-if ( ! $modDisplayNewsHelperRuns ) {
-	$modDisplayNewsHelperRuns++;
-	$dn = new modDisplayNewsHelper();
-	$dn->main($params, $module->id);
-	$modDisplayNewsHelperRuns--;
+if (!$modDisplayNewsHelperRuns) {
+    $modDisplayNewsHelperRuns++;
+    $dn = new modDisplayNewsHelper();
+    $dn->main($params, $module->id);
+    $modDisplayNewsHelperRuns--;
 }
 ?>
