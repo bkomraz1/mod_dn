@@ -6,12 +6,12 @@
         method="upgrade">
     <name>DisplayNews</name>
     <author>BK</author>
-    <creationDate>2014-Apr-30</creationDate>
-    <copyright>(C) 2006 - 2013 BK. All rights reserved.</copyright>
+    <creationDate>2017-Sep-23</creationDate>
+    <copyright>(C) 2006 - 2017 BK. All rights reserved.</copyright>
     <license>http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL</license>
     <authorEmail>bkomraz1@gmail.com</authorEmail>
     <authorUrl>http://joomla.rjews.net</authorUrl>
-    <version>2.7</version>
+    <version>2.7.1</version>
     <description>DISPLAY_NEWS_BY_BK_MODULE</description>
     <updateservers>
         <server type="extension"
