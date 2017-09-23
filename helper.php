@@ -17,7 +17,7 @@ require_once(JPATH_SITE . '/components/com_content/helpers/route.php');
 if (file_exists(JPATH_LIBRARIES . '/joomla/database/table/category.php')) {
     require_once(JPATH_LIBRARIES . '/joomla/database/table/category.php');
     require_once(JPATH_LIBRARIES . '/joomla/database/table/content.php');
-} else {
+} elseif (file_exists(JPATH_LIBRARIES . '/legacy/table/category.php')) {
     require_once JPATH_LIBRARIES . '/legacy/table/category.php';
     require_once JPATH_LIBRARIES . '/legacy/table/content.php';
 }
