@@ -9,10 +9,16 @@
 
 defined('_JEXEC') or die ('Restricted access');
 
+use Joomla\CMS\Helper\ModuleHelper;
+
+if (version_compare(JVERSION, '4.0.0', '>=')) {
+    require_once JPATH_LIBRARIES . '/classmap.php';
+} else {
+    require_once(JPATH_SITE . '/components/com_content/helpers/route.php');
+}
 
 // loads module function file
 jimport('joomla.event.dispatcher');
-require_once(JPATH_SITE . '/components/com_content/helpers/route.php');
 
 if (file_exists(JPATH_LIBRARIES . '/joomla/database/table/category.php')) {
     require_once(JPATH_LIBRARIES . '/joomla/database/table/category.php');
@@ -25,12 +31,14 @@ if (file_exists(JPATH_LIBRARIES . '/joomla/database/table/category.php')) {
 class modDisplayNewsHelper
 {
 
-    var $version = "DisplayNews by BK 2.7";
-    var $css_type = null;
-    var $target = "";
-    static $shown_list = array();
+    var string $version = "DisplayNews by BK 2.7";
+    var string $target;
+    static array $shown_list = array();
+    var JApplicationSite $app;
+    var string $currcontentid;
+//    var CMSObject $params;
 
-    function readmore_out($row, $aroute, $aparams)
+    function readmore_out($row, $aroute, $aparams): string
     {
         // Code for displaying of individual items Read More link
         // $show_text && $show_full_text
@@ -54,7 +62,7 @@ class modDisplayNewsHelper
         return $readmore_out;
     }
 
-    function import_content_plugins()
+    function import_content_plugins(): void
     {
         if ($this->params->get('on_prepare_content_plugins') || $this->params->get('before_display_content_plugins')) {
             if (!$this->params->get('plugins')) {
@@ -75,7 +83,7 @@ class modDisplayNewsHelper
 
     }
 
-    function onPrepareContent(&$row, &$aparams)
+    function onPrepareContent(&$row, &$aparams): void
     {
         global $mainframe;
 
@@ -109,7 +117,7 @@ class modDisplayNewsHelper
 
 
     // Code for displaying of individual items Category
-    function cat_out($row, $croute)
+    function cat_out($row, $croute): string
     {
 
         $cat_out = "";
@@ -140,23 +148,13 @@ class modDisplayNewsHelper
 
     }
 
-    function getShortVersion()
-    {
-        $version = new JVersion();
-        return $version->getShortVersion();
-    }
-
     // Code for displaying of individual items Category
-    function cat_desc_out($row)
+    function cat_desc_out($row): string
     {
         $cat_out = "";
 
         $cparams = new JRegistry();
-        if (version_compare($this->getShortVersion(), '3.0.0', '>=')) {
-            $cparams->loadString($row->cat_params);
-        } else {
-            $cparams->loadJSON($row->cat_params);
-        }
+        $cparams->loadString($row->cat_params);
 
         if (($this->params->get('show_description_image') && $cparams->get('image')) ||
             ($this->params->get('show_description') && $row->cat_description)
@@ -179,7 +177,7 @@ class modDisplayNewsHelper
     }
 
 
-    function text_out($row, $aparams, $aroute)
+    function text_out($row, $aparams, $aroute): array
     {
 
         $this->text_limited = 0;
@@ -617,7 +615,7 @@ class modDisplayNewsHelper
         return array($text_out, $img_out, $video_out);
     }
 
-    static function youtube_param($text, $param, $value)
+    static function youtube_param($text, $param, $value) : string
     {
         if ($value != "") {
             $text = preg_replace('@(<iframe[^>]* src="http[s]*://www.youtube.com/[^">&]*)[&]*' . $param . '=[^"&>]*([&]*[^">]*"[^>]*>)@i', '$1$2', $text);
@@ -626,7 +624,7 @@ class modDisplayNewsHelper
         return $text;
     }
 
-    function before_out(&$row, $aparams)
+    function before_out(&$row, $aparams): string
     {
         $before_out = "";
         if ($this->params->get('before_display_content_plugins')) {
@@ -641,7 +639,7 @@ class modDisplayNewsHelper
 
     }
 
-    function rate_out($row)
+    function rate_out($row): string
     {
         $rate_out = "";
         if ($this->params->get('show_vote')) {
@@ -682,7 +680,7 @@ class modDisplayNewsHelper
         return $rate_out;
     }
 
-    function hits_out($row)
+    function hits_out($row): string
     {
         $hits_out = "";
         if ($this->params->get('show_hits')) {
@@ -697,7 +695,7 @@ class modDisplayNewsHelper
 
     }
 
-    function jcomments_out($row)
+    function jcomments_out($row): string
     {
 
         $jcomments_out = "";
@@ -721,49 +719,47 @@ class modDisplayNewsHelper
 
     }
 
-    function tags_out($row)
+    function tags_out($row): string
     {
 
         $tags_out = "";
 
-        if ($this->params->get('show_tags') and version_compare($this->getShortVersion(), '3.2.0', '>=')) {
-            $tags = new JHelperTags;
-            $itemTags = $tags->getItemTags('com_content.article', $row->id);
+        $tags = new JHelperTags;
+        $itemTags = $tags->getItemTags('com_content.article', $row->id);
 
 
-            $onlyTags = Array();
-            if ($this->params->get('display_tags_type') == 1 and $this->params->get('set_tags')) {
-                foreach ($itemTags as $tag) {
-                    if (in_array($tag->id, $this->params->get('set_tags'))) {
-                        $onlyTags[] = $tag;
-                    }
+        $onlyTags = Array();
+        if ($this->params->get('display_tags_type') == 1 and $this->params->get('set_tags')) {
+            foreach ($itemTags as $tag) {
+                if (in_array($tag->id, $this->params->get('set_tags'))) {
+                    $onlyTags[] = $tag;
                 }
-            } elseif ($this->params->get('display_tags_type') == 2 and $this->params->get('display_tags')) {
-                foreach ($itemTags as $tag) {
-                    if (in_array($tag->id, $this->params->get('display_tags'))) {
-                        $onlyTags[] = $tag;
-                    }
-                }
-            } elseif ($this->params->get('display_tags_type') == 3 and $this->params->get('display_tags')) {
-                foreach ($itemTags as $tag) {
-                    if (!in_array($tag->id, $this->params->get('display_tags'))) {
-                        $onlyTags[] = $tag;
-                    }
-                }
-            } else {
-                $onlyTags = $itemTags;
             }
-
-            if ($this->params->get('show_tags') && !empty($onlyTags)) {
-                $tagLayout = new JLayoutFile('joomla.content.tags');
-                $tags_out = $tagLayout->render($onlyTags);
+        } elseif ($this->params->get('display_tags_type') == 2 and $this->params->get('display_tags')) {
+            foreach ($itemTags as $tag) {
+                if (in_array($tag->id, $this->params->get('display_tags'))) {
+                    $onlyTags[] = $tag;
+                }
             }
+        } elseif ($this->params->get('display_tags_type') == 3 and $this->params->get('display_tags')) {
+            foreach ($itemTags as $tag) {
+                if (!in_array($tag->id, $this->params->get('display_tags'))) {
+                    $onlyTags[] = $tag;
+                }
+            }
+        } else {
+            $onlyTags = $itemTags;
+        }
+
+        if ($this->params->get('show_tags') && !empty($onlyTags)) {
+            $tagLayout = new JLayoutFile('joomla.content.tags');
+            $tags_out = $tagLayout->render($onlyTags);
         }
         return $tags_out;
     }
 
 
-    function author_out($row, $aparams)
+    function author_out($row, $aparams): string
     {
         $author_out = "";
         // Code for displaying of individual items Author
@@ -778,7 +774,7 @@ class modDisplayNewsHelper
     }
 
     // Code for displaying of individual items Date
-    function date_out($row, $aparams)
+    function date_out($row, $aparams): string
     {
         $date_out = "";
         //To show date item created, date mambot called
@@ -801,7 +797,7 @@ class modDisplayNewsHelper
     // Code for displaying of individual items Title
     //---------------------------------------------------------------------
 
-    function title_out($row, $aroute)
+    function title_out($row, $aroute): string
     {
 
         $title_out = "";
@@ -838,7 +834,7 @@ class modDisplayNewsHelper
 
 
     function create_link($url, $text, /* $style = "", */
-                         $tooltip = "")
+                         $tooltip = ""): string
     {
 
         // ".$this->target."
@@ -896,7 +892,8 @@ class modDisplayNewsHelper
 
 
             if ($item_id == -1) {
-                $item_id = JRequest::getInt('Itemid');
+//                $item_id = JRequest::getInt('Itemid');
+                $item_id = $input->getInt('Itemid');
             }
             $url = preg_replace('/&Itemid=[0-9]*/i', '', $url) . '&Itemid=' . $item_id;
         }
@@ -905,7 +902,7 @@ class modDisplayNewsHelper
 
 
     // Function to filter html code and special characters from text
-    function dn_filter($text)
+    function dn_filter($text): string
     {
         $text = preg_replace('@<div[^>]*class=(["\'])mosimage_caption\\1[^>]*>[^>]*</div>@', '', $text);
 
@@ -960,25 +957,10 @@ class modDisplayNewsHelper
     }
 
     //  Function required to create set of Names, '' added
-    function dn_set_name($param)
-    {
-        if ($param <> "") {
-            $paramA = explode(",", $param);
-            $a = "0";
-            foreach ($paramA as $paramB) {
-                $paramB = trim($paramB);
-                $paramB = "'" . addslashes($paramB) . "'";
-                $paramA[$a] = $paramB;
-                $a++;
-            }
-            $param = implode(",", $paramA);
-        }
-        return $param;
-    }
     //---------------------------------------------------------------------
     //  Functinality to allow text_hover to be blank by use if special character "#" entered
     //  If not then space added to the end of the variables
-    function dn_hovertext($text1, $text2)
+    function dn_hovertext($text1, $text2): string
     {
         if ($text1 == "#") {
             return "";
@@ -1002,7 +984,7 @@ class modDisplayNewsHelper
      * @param boolean $considerHtml If true, HTML tags would be handled correctly
      * @return string Trimmed string.
      */
-    function truncate($text, $length = 100, $ending = '...', $exact = true, $considerHtml = false)
+    function truncate($text, $length = 100, $ending = '...', $exact = true, $considerHtml = false): array
     {
 
         require_once(JPATH_LIBRARIES . '/phputf8/utf8.php');
@@ -1104,7 +1086,7 @@ class modDisplayNewsHelper
 
 
     // Function that limits title, intro or full to specified character or word length
-    function dn_limit(&$text, $limit_type, $length_chars, $ending = '...')
+    function dn_limit(&$text, $limit_type, $length_chars, $ending = '...'): bool
     {
 
         if ($length_chars == 0) {
@@ -1124,7 +1106,7 @@ class modDisplayNewsHelper
 
     //---------------------------------------------------------------------
 
-    function imageResize($originalImage, $toWidth, $toHeight, $image_scale, $bgcolor, $image_type)
+    function imageResize($originalImage, $toWidth, $toHeight, $image_scale, $bgcolor, $image_type): string
     {
 
         static $multithumb_loaded = 0;
@@ -1166,7 +1148,7 @@ class modDisplayNewsHelper
         }
     }
 
-    function imageResizeScale($originalImage, $toWidth, $toHeight)
+    function imageResizeScale($originalImage, $toWidth, $toHeight): string
     {
 
         // Get the original geometry and calculate scales
@@ -1209,7 +1191,7 @@ class modDisplayNewsHelper
         return "src=\"${originalImage}\"  width=\"$new_width\" height=\"$new_height\" ";
     }
 
-    function init_params($params, $module_id)
+    function init_params($params, $module_id): bool
     {
         $this->params = $params;
         $this->module_id = $module_id;
@@ -1222,7 +1204,7 @@ class modDisplayNewsHelper
 
         //$this->globalConfig;
         //if (!isset($globalConfig) ) {
-        $com_content = JComponentHelper::getComponent('com_content');
+        $com_content = \Joomla\CMS\Component\ComponentHelper::getComponent('com_content');
         $this->globalConfig = /* new JParameter ( */
             $com_content->params /*)*/
         ;
@@ -1426,21 +1408,22 @@ class modDisplayNewsHelper
         $this->params->def('set_column', 1);
 
 
-        $this->view = JRequest::getCmd('view');
+//        $this->view = $input->getCmd('view');
+        $this->view = 'article';
 
-        $db = JFactory::getDBO();
+        $db = \Joomla\CMS\Factory::getDBO();
 
 
         // If { set_auto = y } then Module will automatically determine section/category id of current page and use this to control what news is dsiplayed
         if ($this->params->get('set_category_type') == 1) {
 
             if ($this->view == "category") {
-                $temp = JRequest::getString('id');
+                $temp = $input->getString('id');
                 $temp = explode(':', $temp);
                 $zcategoryid = $temp[0];
                 $this->set_category_id = $zcategoryid;
             } elseif ($this->view == "article") {
-                $temp = JRequest::getString('id');
+                $temp = $input->getString('id');
                 $temp = explode(':', $temp);
                 $zcontentid = $temp[0];
 
@@ -1458,10 +1441,12 @@ class modDisplayNewsHelper
 
             $this->likes = array();
 
-            $option = JRequest::getCmd('option');
-            // $view				= JRequest::getCmd('view');
+//            $option = $input->getCmd('option');
+             $view				= $input->getCmd('view');
+             $view				= 'article';
 
-            $temp = JRequest::getString('id');
+
+            $temp = $input->getString('id');
             $temp = explode(':', $temp);
             $id = $temp[0];
 
@@ -1528,14 +1513,14 @@ class modDisplayNewsHelper
         if ($this->params->get('set_auto_author') >= 1 and $this->params->get('set_auto_author') <= 3) {
 
             if ($this->params->get('set_auto_author') == 3) {
-                $user = JFactory::getUser();
+                $user = \Joomla\CMS\Factory::getUser();
                 if (!$user->guest) {
                     $this->params->set('set_author_name', array($user->username));
                 } /* else {
 			$this->params->set( 'set_author_id', -1);
 			} */
             } elseif ($this->view == "article") {
-                $temp = JRequest::getString('id');
+                $temp = $input->getString('id');
                 $temp = explode(':', $temp);
                 $zcontentid = $temp[0];
 
@@ -1566,7 +1551,7 @@ class modDisplayNewsHelper
         }
 
         if ($this->view == "article") {
-            $temp = JRequest::getString('id');
+            $temp = $this->app->input->getString('id');
             $temp = explode(':', $temp);
             $this->currcontentid = $temp[0];
         }
@@ -1575,15 +1560,15 @@ class modDisplayNewsHelper
 
     }
 
-    function query()
+    function query(): string
     {
 
         global $mainframe;
-        $config = JFactory::getConfig();
+        $config = \Joomla\CMS\Factory::getConfig();
 
-        $my = JFactory::getUser();
-        $tag = JFactory::getLanguage()->getTag();
-        $app = JFactory::getApplication();
+        $my = \Joomla\CMS\Factory::getUser();
+        $tag = \Joomla\CMS\Factory::getLanguage()->getTag();
+        $app = \Joomla\CMS\Factory::getApplication();
 
         $set_access = $this->params->get('set_access');
 
@@ -1648,21 +1633,16 @@ class modDisplayNewsHelper
                 $order_by = "a.created DESC";
         }
 
-        $date = JFactory::getDate();
-        if (version_compare($this->getShortVersion(), '3.0.0', '>=')) {
-            $now = $date->toSql();
-        } else {
-            $now = $date->toMySQL();
-        }
+        $date = \Joomla\CMS\Factory::getDate();
+        $now = $date->toSql();
 
         $groups = implode(",", $my->getAuthorisedViewLevels());
 
-        $db = JFactory::getDBO();
+        $db = \Joomla\CMS\Factory::getDBO();
         $nullDate = $db->getNullDate();
 
         $tags_where = "";
-        if (version_compare($this->getShortVersion(), '3.2.0', '>=') and
-            $this->params->get('set_tags_type') == 2 and
+        if ($this->params->get('set_tags_type') == 2 and
             $this->params->get('set_tags')
         ) {
             foreach ($this->params->get('set_tags') as $tag) {
@@ -1699,7 +1679,7 @@ class modDisplayNewsHelper
             # FROM
             . "\n FROM #__content AS a "
 
-            . ((version_compare($this->getShortVersion(), '3.2.0', '>=') and $this->params->get('set_tags_type') == 1 and $this->params->get('set_tags')) ? " JOIN #__contentitem_tag_map AS m ON m.content_item_id = a.id AND m.type_alias = 'com_content.article' AND m.tag_id in (" . implode(",", $this->params->get('set_tags')) . ") " : "")
+            . (( $this->params->get('set_tags_type') == 1 and $this->params->get('set_tags')) ? " JOIN #__contentitem_tag_map AS m ON m.content_item_id = a.id AND m.type_alias = 'com_content.article' AND m.tag_id in (" . implode(",", $this->params->get('set_tags')) . ") " : "")
 //         . (  ( version_compare($this->getShortVersion(), '3.2.0', '>=') and $this->params->get( 'set_tags_type' )==2 and $this->params->get( 'set_tags' ) ) ? " JOIN #__contentitem_tag_map AS m ON m.content_item_id = a.id AND m.type_alias = 'com_content.article' AND m.tag_id in (".implode(",",$this->params->get( 'set_tags' )).") " : ""  )
 //          . ( $this->params->get( 'set_tags' ) ? "LEFT JOIN #__tags AS t ON m.tag_id = t.id AND t.published = 1 AND t.access IN (" . $groups . ") \n" : ""  )
             . (($this->params->get('show_frontpage') == "n" || $this->params->get('show_frontpage') == "only" || ($this->params->get('ordering') == "frontpageordering")) ? "\n LEFT JOIN #__content_frontpage AS b ON b.content_id = a.id" : "")
@@ -1787,7 +1767,7 @@ class modDisplayNewsHelper
             . (($this->params->get('avoid_shown') == 2 && !empty(modDisplayNewsHelper::$shown_list)) ? "\n  AND (a.id NOT IN (" . implode(",", modDisplayNewsHelper::$shown_list) . ") )" : '')
             . $tags_where
 
-            . (($this->params->get('jcomments') or (version_compare($this->getShortVersion(), '3.2.0', '>=') and $this->params->get('set_tags_type'))) ? " group by a.id" : "")
+            . (($this->params->get('jcomments') or ($this->params->get('set_tags_type'))) ? " group by a.id" : "")
 
             #******************************************#
             //  This Controls the fact that this module displayes the Latest News first
@@ -1798,7 +1778,7 @@ class modDisplayNewsHelper
         return $query;
     }
 
-    function image_intro($images)
+    function image_intro($images): string
     {
         $image = '';
 
@@ -1818,7 +1798,7 @@ class modDisplayNewsHelper
         return $image;
     }
 
-    function image_fulltext($images)
+    function image_fulltext($images): string
     {
         $image = '';
 
@@ -1838,7 +1818,7 @@ class modDisplayNewsHelper
         return $image;
     }
 
-    function scroll_start()
+    function scroll_start(): string
     {
 
         $scroll_start = "";
@@ -1853,7 +1833,7 @@ class modDisplayNewsHelper
                 static $pausecontroler = 0;
                 if (!$pausecontroler) {
                     $pausecontroler = 1;
-                    $document = JFactory::getDocument();
+                    $document = \Joomla\CMS\Factory::getDocument();
                     $document->addScript(JURI::base(true) . '/modules/mod_dn/pausecontroller.js');
                     $document->addStyleDeclaration('
 						#pscroller' . $this->id . '{
@@ -1943,7 +1923,7 @@ class modDisplayNewsHelper
 
     }
 
-    function scroll_finish()
+    function scroll_finish(): string
     {
 
         $scroll_finish = '';
@@ -1975,7 +1955,7 @@ class modDisplayNewsHelper
 
     }
 
-    function row_start_out($row, $fc, $fr, $sc, $vc, $vr)
+    function row_start_out($row, $fc, $fr, $sc, $vc, $vr): string
     {
 
         $row_start_out = "";
@@ -2054,7 +2034,7 @@ class modDisplayNewsHelper
 
     }
 
-    function row_end_out($lc, $lr)
+    function row_end_out($lc, $lr): string
     {
 
         $row_end_out = "";
@@ -2117,7 +2097,7 @@ class modDisplayNewsHelper
 
     }
 
-    function mod_start_out()
+    function mod_start_out(): string
     {
 
         $mod_start_out = "";
@@ -2153,7 +2133,7 @@ class modDisplayNewsHelper
 
     }
 
-    function mod_end_out()
+    function mod_end_out(): string
     {
 
         $mod_end_out = "";
@@ -2189,7 +2169,7 @@ class modDisplayNewsHelper
         return $mod_end_out;
     }
 
-    function mod_title_out($row)
+    function mod_title_out($row): string
     {
 
         $mod_title_out = "";
@@ -2201,17 +2181,18 @@ class modDisplayNewsHelper
         return $mod_title_out;
     }
 
-    function main(&$params, $module_id)
+    function main(&$params, $module_id): void
     {
+
+        $this->app = \Joomla\CMS\Factory::getApplication();
 
         if ($this->init_params($params, $module_id) === false) {
             return;
         }
 
-        $app = JFactory::getApplication();
-        if (($app->input->get('option') === 'com_content') and
-            ($app->input->get('view') === 'article') and
-            ($this->params->get('show_on_article_page', 1) == 0)
+        if (($this->app->input->get('option') === 'com_content') and
+            ($this->app->input->get('view') === 'article') and
+            ($this->this->params->get('show_on_article_page', 1) == 0)
         ) {
             return;
         }
@@ -2219,21 +2200,13 @@ class modDisplayNewsHelper
         static $id = 0;
         $this->id = $id;
 
-        $config = JFactory::getConfig();
+        $config = \Joomla\CMS\Factory::getConfig();
 
-        if (version_compare($this->getShortVersion(), '3.0.0', '>=')) {
-            $jtzoffset = $config->get('config.offset');
-        } else {
-            $jtzoffset = $config->getValue('config.offset');
-        }
+        $jtzoffset = $config->get('config.offset');
 
-        $datenow = new JDate('now', $jtzoffset);
+        $datenow = new \Joomla\CMS\Date\Date('now', $jtzoffset);
 
-        if (version_compare($this->getShortVersion(), '3.0.0', '>=')) {
-            $dbdatenow = new JDate($datenow->toSql(), $jtzoffset);
-        } else {
-            $dbdatenow = new JDate($datenow->toMySQL(), $jtzoffset);
-        }
+        $dbdatenow = new \Joomla\CMS\Date\Date($datenow->toSql(), $jtzoffset);
 
         $this->tzoffset = ($datenow->toUnix() - $dbdatenow->toUnix()) / 3600;
 
@@ -2276,13 +2249,13 @@ class modDisplayNewsHelper
         }
 
         $query = $this->query();
-        $db = JFactory::getDBO();
+        $db = \Joomla\CMS\Factory::getDBO();
         $db->setQuery($query);
 
         $rows = $db->loadObjectList();
 
         if (is_null($rows) && $this->params->get('debug')) {
-            $jAp = JFactory::getApplication();
+            $jAp = \Joomla\CMS\Factory::getApplication();
             $jAp->enqueueMessage(nl2br($db->getErrorMsg()), 'error');
             return;
         }
@@ -2377,11 +2350,7 @@ class modDisplayNewsHelper
 
                 $aparams = new JRegistry();
 
-                if (version_compare($this->getShortVersion(), '3.0.0', '>=')) {
-                    $aparams->loadString($row->attribs);
-                } else {
-                    $aparams->loadJSON($row->attribs);
-                }
+                $aparams->loadString($row->attribs);
 
                 $croute = modDisplayNewsHelper::fixItemId(ContentHelperRoute::getCategoryRoute($row->catid), $this->params->get('item_id_cat_type'), $this->params->get('item_id_cat'));
                 if ($this->params->get('article_link')) {
