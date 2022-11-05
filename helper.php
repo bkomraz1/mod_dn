@@ -87,14 +87,14 @@ class modDisplayNewsHelper
     {
         global $mainframe;
 
-        if ($this->params->get('on_prepare_content_plugins')) {
-            // $results = $mainframe->triggerEvent('onPrepareContent', array (&$row, &$aparams, 1));
-            $dispatcher = JDispatcher::getInstance();
-            JPluginHelper::importPlugin('content');
-
-
-            $results = $dispatcher->trigger('onContentPrepare', array($this->params->get('mod_dn_context_content', "mod_dn.article"), &$row, &$this->params, 0));
-        }
+//        if ($this->params->get('on_prepare_content_plugins')) {
+//            // $results = $mainframe->triggerEvent('onPrepareContent', array (&$row, &$aparams, 1));
+//            $dispatcher = JDispatcher::getInstance();
+//            JPluginHelper::importPlugin('content');
+//
+//
+//            $results = $dispatcher->trigger('onContentPrepare', array($this->params->get('mod_dn_context_content', "mod_dn.article"), &$row, &$this->params, 0));
+//        }
     }
 
     /*    function mod_automore_out($row)
@@ -627,14 +627,14 @@ class modDisplayNewsHelper
     function before_out(&$row, $aparams): string
     {
         $before_out = "";
-        if ($this->params->get('before_display_content_plugins')) {
-            $aparams->set('show_vote', $this->params->get('show_vote') && !$this->params->get('force_builtin_rating'));
-
-            $dispatcher = JDispatcher::getInstance();
-            $results = $dispatcher->trigger('onContentBeforeDisplay', array($this->params->get('mod_dn_context_before', "mod_dn.featured"), &$row, &  $this->params, 0));
-            $results = trim(implode("\n", $results));
-            $before_out = $results;
-        }
+//        if ($this->params->get('before_display_content_plugins')) {
+//            $aparams->set('show_vote', $this->params->get('show_vote') && !$this->params->get('force_builtin_rating'));
+//
+//            $dispatcher = JDispatcher::getInstance();
+//            $results = $dispatcher->trigger('onContentBeforeDisplay', array($this->params->get('mod_dn_context_before', "mod_dn.featured"), &$row, &  $this->params, 0));
+//            $results = trim(implode("\n", $results));
+//            $before_out = $results;
+//        }
         return $before_out;
 
     }
@@ -1204,7 +1204,7 @@ class modDisplayNewsHelper
 
         //$this->globalConfig;
         //if (!isset($globalConfig) ) {
-        $com_content = \Joomla\CMS\Component\ComponentHelper::getComponent('com_content');
+        $com_content = JComponentHelper::getComponent('com_content');
         $this->globalConfig = /* new JParameter ( */
             $com_content->params /*)*/
         ;
@@ -1411,7 +1411,7 @@ class modDisplayNewsHelper
 //        $this->view = $input->getCmd('view');
         $this->view = 'article';
 
-        $db = \Joomla\CMS\Factory::getDBO();
+        $db = JFactory::getDBO();
 
 
         // If { set_auto = y } then Module will automatically determine section/category id of current page and use this to control what news is dsiplayed
@@ -1513,7 +1513,7 @@ class modDisplayNewsHelper
         if ($this->params->get('set_auto_author') >= 1 and $this->params->get('set_auto_author') <= 3) {
 
             if ($this->params->get('set_auto_author') == 3) {
-                $user = \Joomla\CMS\Factory::getUser();
+                $user = JFactory::getUser();
                 if (!$user->guest) {
                     $this->params->set('set_author_name', array($user->username));
                 } /* else {
@@ -1564,11 +1564,11 @@ class modDisplayNewsHelper
     {
 
         global $mainframe;
-        $config = \Joomla\CMS\Factory::getConfig();
+        $config = JFactory::getConfig();
 
-        $my = \Joomla\CMS\Factory::getUser();
-        $tag = \Joomla\CMS\Factory::getLanguage()->getTag();
-        $app = \Joomla\CMS\Factory::getApplication();
+        $my = JFactory::getUser();
+        $tag = JFactory::getLanguage()->getTag();
+        $app = JFactory::getApplication();
 
         $set_access = $this->params->get('set_access');
 
@@ -1633,12 +1633,12 @@ class modDisplayNewsHelper
                 $order_by = "a.created DESC";
         }
 
-        $date = \Joomla\CMS\Factory::getDate();
+        $date = JFactory::getDate();
         $now = $date->toSql();
 
         $groups = implode(",", $my->getAuthorisedViewLevels());
 
-        $db = \Joomla\CMS\Factory::getDBO();
+        $db = JFactory::getDBO();
         $nullDate = $db->getNullDate();
 
         $tags_where = "";
@@ -1662,8 +1662,10 @@ class modDisplayNewsHelper
             (($this->params->get('show_text') > 1 || $this->params->get('show_readmore') == 2) ? ", a.fulltext" : "") .
             ", a.catid " .
             ($this->params->get('show_date') ? ", a." . $this->created . " as created" : "") .
-            ($this->params->get('ordering') == "publish_down" ? ', IF(publish_down = "0000-00-00 00:00:00", 1, 0) AS publish_down_isnull ' : '') .
-            ($this->params->get('ordering') == "mostold" ? ', IF(a.' . $this->created . ' = "0000-00-00 00:00:00", 1, 0) AS created_isnull ' : '') .
+            ($this->params->get('ordering') == "publish_down" && !version_compare(JVERSION, '4.0.0', '>=') ? ', IF(publish_down = "0000-00-00 00:00:00", 1, 0) AS publish_down_isnull ' : '') .
+            ($this->params->get('ordering') == "publish_down" &&  version_compare(JVERSION, '4.0.0', '>=') ? ', IF(publish_down IS NULL, 1, 0) AS publish_down_isnull ' : '') .
+            ($this->params->get('ordering') == "mostold" && !version_compare(JVERSION, '4.0.0', '>=') ? ', IF(a.' . $this->created . ' = "0000-00-00 00:00:00", 1, 0) AS created_isnull ' : '') .
+            ($this->params->get('ordering') == "mostold" &&  version_compare(JVERSION, '4.0.0', '>=') ? ', IF(a.' . $this->created . ' IS NULL, 1, 0) AS created_isnull ' : '') .
             ($this->params->get('show_title_auto') || $this->params->get('show_author') ? ', CASE WHEN CHAR_LENGTH(a.created_by_alias) THEN a.created_by_alias ELSE c.name END as author' : '') .
             ($this->params->get('show_hits') ? ", a.hits" : "") .
             ($this->params->get('get_image') ? ", a.images" : "")
@@ -1694,7 +1696,8 @@ class modDisplayNewsHelper
             . "\n  WHERE (a.state IN (" . $this->params->get('set_state', "1") . "))"
             . ($app->getLanguageFilter() ? " AND a.language in ('" . $tag . "','*')" : "")
             . ($app->getLanguageFilter() ? " AND cc.language in ('" . $tag . "','*')" : "")
-            . (($this->params->get('set_date_range') < 20 /* or ($this->params->get( 'set_date_since' )!="" and $this->params->get( 'set_date_until' )!="") */) ? "\n  AND (a.publish_up = " . $db->Quote($nullDate) . " OR a.publish_up <= " . $db->Quote($now) . "  )" : "")
+            . ($this->params->get('set_date_range') < 20 /* or ($this->params->get( 'set_date_since' )!="" and $this->params->get( 'set_date_until' )!="") */ && !version_compare(JVERSION, '4.0.0', '>=') ? "\n  AND (a.publish_up = " . $db->Quote($nullDate) . " OR a.publish_up <= " . $db->Quote($now) . "  )" : "")
+            . ($this->params->get('set_date_range') < 20 /* or ($this->params->get( 'set_date_since' )!="" and $this->params->get( 'set_date_until' )!="") */ &&  version_compare(JVERSION, '4.0.0', '>=') ? "\n  AND (a.publish_up IS NULL OR a.publish_up <= " . $db->Quote($now) . "  )" : "")
             . (($this->params->get('set_date_range') >= 20 and ($this->params->get('set_date_since') != "" or $this->params->get('set_date_until') != "")) ? "\n  AND ( a.publish_up > " . $db->Quote($now) . "  )" : "")
 
             . (($this->params->get('set_date_range') == 21 and $this->params->get('set_date_since') != "") ? "\n  AND (TO_DAYS(ADDDATE(a.publish_up, INTERVAL " . $this->tzoffset . " HOUR)) - TO_DAYS(ADDDATE(" . $db->Quote($now) . ", INTERVAL " . $this->tzoffset . " HOUR) ) >= '" . $this->params->get('set_date_since') . "' )" : '')
@@ -1702,7 +1705,8 @@ class modDisplayNewsHelper
 
             . (($this->params->get('set_date_range') == 25 and ($this->params->get('set_date_since') != "")) ? "\n  AND (UNIX_TIMESTAMP(a.publish_up) - UNIX_TIMESTAMP(" . $db->Quote($now) . ") <= " . $this->params->get('set_date_since') . "*3600 )" : '')
             . (($this->params->get('set_date_range') == 25 and ($this->params->get('set_date_until') != "")) ? "\n  AND (UNIX_TIMESTAMP(a.publish_up) - UNIX_TIMESTAMP(" . $db->Quote($now) . ") >= " . $this->params->get('set_date_until') . "*3600 )" : '')
-            . "\n  AND (a.publish_down = " . $db->Quote($nullDate) . " OR a.publish_down >= " . $db->Quote($now) . "  )"
+            . (!version_compare(JVERSION, '4.0.0', '>=') ? "\n  AND (a.publish_down = " . $db->Quote($nullDate) . " OR a.publish_down >= " . $db->Quote($now) . "  )" : "")
+            . ( version_compare(JVERSION, '4.0.0', '>=') ? "\n  AND (a.publish_down IS NULL OR a.publish_down >= " . $db->Quote($now) . "  )" : "")
             . "\n AND (a.catid=0 OR cc.published = '1')"
             . (($this->params->get('set_related', 0) && $this->likes) ? ' AND ( CONCAT(",", REPLACE(a.metakey,", ",","),",") LIKE "%' . implode('%" OR CONCAT(",", REPLACE(a.metakey,", ",","),",") LIKE "%', $this->likes) . '%" )' : '')
             . (($this->params->get('set_metakeys', 0) && $this->metakeys) ? ' AND ( CONCAT(",", REPLACE(a.metakey,", ",","),",") LIKE "%' . implode('%" OR CONCAT(",", REPLACE(a.metakey,", ",","),",") LIKE "%', $this->metakeys) . '%" )' : '')
@@ -1833,7 +1837,7 @@ class modDisplayNewsHelper
                 static $pausecontroler = 0;
                 if (!$pausecontroler) {
                     $pausecontroler = 1;
-                    $document = \Joomla\CMS\Factory::getDocument();
+                    $document = JFactory::getDocument();
                     $document->addScript(JURI::base(true) . '/modules/mod_dn/pausecontroller.js');
                     $document->addStyleDeclaration('
 						#pscroller' . $this->id . '{
@@ -2181,32 +2185,32 @@ class modDisplayNewsHelper
         return $mod_title_out;
     }
 
-    function main(&$params, $module_id): void
+    function main(&$params, $module_id): string
     {
 
-        $this->app = \Joomla\CMS\Factory::getApplication();
+        $this->app = JFactory::getApplication();
 
         if ($this->init_params($params, $module_id) === false) {
-            return;
+            return "";
         }
 
         if (($this->app->input->get('option') === 'com_content') and
             ($this->app->input->get('view') === 'article') and
-            ($this->this->params->get('show_on_article_page', 1) == 0)
+            ($this->params->get('show_on_article_page', 1) == 0)
         ) {
-            return;
+            return "";
         }
 
         static $id = 0;
         $this->id = $id;
 
-        $config = \Joomla\CMS\Factory::getConfig();
+        $config = JFactory::getConfig();
 
         $jtzoffset = $config->get('config.offset');
 
-        $datenow = new \Joomla\CMS\Date\Date('now', $jtzoffset);
+        $datenow = new JDate('now', $jtzoffset);
 
-        $dbdatenow = new \Joomla\CMS\Date\Date($datenow->toSql(), $jtzoffset);
+        $dbdatenow = new JDate($datenow->toSql(), $jtzoffset);
 
         $this->tzoffset = ($datenow->toUnix() - $dbdatenow->toUnix()) / 3600;
 
@@ -2242,22 +2246,26 @@ class modDisplayNewsHelper
                     $this->jw_allvideos_params->set('autoplay', $this->params->get('autoplay'));
                 }
 
-                $dispatcher = JDispatcher::getInstance();
-                $this->plgAllvideos = new plgContentJw_allvideos($dispatcher, $jw_allvideos_plugin->params);
+//                $dispatcher = JDispatcher::getInstance();
+//                $this->plgAllvideos = new plgContentJw_allvideos($dispatcher, $jw_allvideos_plugin->params);
 
             }
         }
 
         $query = $this->query();
-        $db = \Joomla\CMS\Factory::getDBO();
+        $db = JFactory::getDBO();
+//        echo "DEBUG: ";
+//        echo $query;
         $db->setQuery($query);
 
         $rows = $db->loadObjectList();
+//        echo "DEBUG: ";
+//        echo count($rows);
 
         if (is_null($rows) && $this->params->get('debug')) {
-            $jAp = \Joomla\CMS\Factory::getApplication();
+            $jAp = JFactory::getApplication();
             $jAp->enqueueMessage(nl2br($db->getErrorMsg()), 'error');
-            return;
+            return "";
         }
 
         ######################################################################################################################################
@@ -2443,7 +2451,7 @@ class modDisplayNewsHelper
         } else {
 
             if ($this->params->get('if_no_articles') == 0) {
-                return;
+                return "";
             }
 
             // End of Loop //
@@ -2465,10 +2473,10 @@ class modDisplayNewsHelper
             eval("\$out = " . str_replace('"', '"', $this->params->get('module_template')) . ";");
         }
 
-        echo "<!-- BEGIN '" . $this->version . "' -->" . $out . "<!-- END '" . $this->version . "' -->\n";
-
+        return "<!-- BEGIN '" . $this->version . "' -->" . $out . "<!-- END '" . $this->version . "' -->\n";
 
     } // dn_main
+
 
 }
 
