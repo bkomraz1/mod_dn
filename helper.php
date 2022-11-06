@@ -36,7 +36,7 @@ class modDisplayNewsHelper
     static array $shown_list = array();
     var JApplicationSite $app;
     var string $currcontentid;
-//    var CMSObject $params;
+	var JRegistry $params;
 
     function readmore_out($row, $aroute, $aparams): string
     {
