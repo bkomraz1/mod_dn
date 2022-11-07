@@ -31,8 +31,8 @@ if (file_exists(JPATH_LIBRARIES . '/joomla/database/table/category.php')) {
 class modDisplayNewsHelper
 {
 
-    var string $version = "DisplayNews by BK 2.7";
-    var string $target;
+    var string $version = "DisplayNews by BK 3.0.2";
+    var string $target = "";
     static array $shown_list = array();
     var JApplicationSite $app;
     var string $currcontentid;
