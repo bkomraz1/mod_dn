@@ -7,12 +7,12 @@
     <license>http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL</license>
     <authorEmail>bkomraz1@gmail.com</authorEmail>
     <authorUrl>http://joomla.rjews.net</authorUrl>
-    <version>3.0.0</version>
+    <version>3.0.1</version>
     <description>DISPLAY_NEWS_BY_BK_MODULE</description>
     <updateservers>
         <server type="extension"
                 priority="1"
-                name="Joomla.Rjews.Net">http://joomla.rjews.net/extensions.xml
+                name="Joomla.Rjews.Net">https://raw.githubusercontent.com/bkomraz1/joomla-updates/main/mod_dn.xml
         </server>
     </updateservers>
     <files>
