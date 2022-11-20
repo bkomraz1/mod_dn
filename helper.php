@@ -1106,7 +1106,7 @@ class modDisplayNewsHelper
 
     //---------------------------------------------------------------------
 
-    function imageResize($originalImage, $toWidth, $toHeight, $image_scale, $bgcolor, $image_type): string
+    static function imageResize($originalImage, $toWidth, $toHeight, $image_scale, $bgcolor, $image_type): string
     {
 
         static $multithumb_loaded = 0;
@@ -1148,7 +1148,7 @@ class modDisplayNewsHelper
         }
     }
 
-    function imageResizeScale($originalImage, $toWidth, $toHeight): string
+    static function imageResizeScale($originalImage, $toWidth, $toHeight): string
     {
 
         // Get the original geometry and calculate scales
