@@ -31,7 +31,7 @@ if (file_exists(JPATH_LIBRARIES . '/joomla/database/table/category.php')) {
 class modDisplayNewsHelper
 {
 
-    var string $version = "DisplayNews by BK 3.0.2";
+    var string $version = "DisplayNews by BK 3.0.3";
     var string $target = "";
     static array $shown_list = array();
     var JApplicationSite $app;
@@ -269,12 +269,9 @@ class modDisplayNewsHelper
                 $text = preg_replace('/(<img[^>]*\s+style\s*=\s*".*)(\s?height\s*:\s*\w+\s*[;]?)([^>]*>)/i', '$1 $3', $text);
 
                 $text = preg_replace_callback('@(<img[^>]*\s+)(src\s*=\s*["\']*)([^"\']+)(["\']*)([^>]*>)@i',
-                    create_function(
-                    // single quotes are essential here,
-                    // or alternative escape all $ as \$
-                        '$img',
-                        'return $img[1]." ".modDisplayNewsHelper::imageResize($img[3],' . $this->params->get('image_width') . ',' . $this->params->get('image_height') . ',"' . $this->params->get('image_scale') . '","' . $this->params->get('image_bg', "#FFFFFF") . '","' . $this->params->get('image_type') . '")." ".$img[5];'
-                    ),
+                    function($img){
+                    return $img[1]." ".modDisplayNewsHelper::imageResize($img[3], $this->params->get('image_width') ,$this->params->get('image_height') ,$this->params->get('image_scale') , $this->params->get('image_bg', "#FFFFFF"),$this->params->get('image_type') )." ".$img[5];
+                    },
                     $text
                 );
 
@@ -369,12 +366,9 @@ class modDisplayNewsHelper
                 $i = 0;
 
                 $text = preg_replace_callback('/<img[^>]*>/i',
-                    create_function(
-                    // single quotes are essential here,
-                    // or alternative escape all $ as \$
-                        '$img',
-                        'global $i; $i ++; if ($i <= ' . $this->params->get('image_num') . ') return $img[0];'
-                    ),
+                    function($img) {
+                        global $i; $i ++; if ($i <= $this->params->get('image_num') ) return $img[0];
+                    },
                     $text
                 );
             }
@@ -405,20 +399,20 @@ class modDisplayNewsHelper
             if ($this->params->get('get_image') && $this->params->get('link_image') && !$this->params->get('link_text')) {
 
                 $text = preg_replace_callback('/(<a href[^>]*><img[^>]*><\/a[^>]*>)|(<img[^>]*)(title=(["\']).*?\\3)([^>]*>)/i',
-                    create_function(
+                    function(
                     // single quotes are essential here,
                     // or alternative escape all $ as \$
-                        '$img',
-                        'return $img[1].$img[2].$img[5];'
-                    ),
+                        $img){
+                        return $img[1].$img[2].$img[5];
+                    },
                     $text
                 );
 
                 $text = preg_replace_callback('/(<a href[^>]*><img[^>]*><\/a[^>]*>)|(<img[^>]*>)/i',
-                    create_function(
-                        '$img',
-                        "return \"<a " . $this->target . " href='$aroute'>\".\$img[1].\$img[2].\"</a>\";"
-                    ),
+                    function(
+                        $img){
+                        return "<a " . $this->target . " href='$aroute'>".$img[1].$img[2]."</a>";
+                    },
                     $text
                 );
 
@@ -444,23 +438,19 @@ class modDisplayNewsHelper
                             $i = 0;
 
                             $text = preg_replace_callback("@({($this->grabTags)}.*)(\|.*){0,1}({/($this->grabTags)})@iU",
-                                create_function(
-                                // single quotes are essential here,
-                                // or alternative escape all $ as \$
-                                    '$video',
-                                    'global $i; $i ++; if ($i <= ' . $this->params->get('video_num') . ') return $video[1].$video[4];'
-                                ),
+                                function($video) {
+                                    global $i;
+                                    $i++;
+                                    if ($i <= $this->params->get('video_num') ) return $video[1] . $video[4];
+                                },
                                 $text
                             );
 
                         } else {
                             $text = preg_replace_callback("@({($this->grabTags)}.*)(\|.*){0,1}({/($this->grabTags)})@iU",
-                                create_function(
-                                // single quotes are essential here,
-                                // or alternative escape all $ as \$
-                                    '$video',
-                                    'return $video[1].$video[4];'
-                                ),
+                                function($video){
+                                  return $video[1].$video[4];
+                                },
                                 $text
                             );
                         }
