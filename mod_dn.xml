@@ -1,22 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<extension
-        type="module"
-        version="1.6.0"
-        client="site"
-        method="upgrade">
+<extension type="module" client="site" method="upgrade">
     <name>DisplayNews</name>
     <author>BK</author>
-    <creationDate>2017-Sep-23</creationDate>
-    <copyright>(C) 2006 - 2017 BK. All rights reserved.</copyright>
+    <creationDate>2022-Nov-27</creationDate>
+    <copyright>(C) 2006 - 2022 BK. All rights reserved.</copyright>
     <license>http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL</license>
     <authorEmail>bkomraz1@gmail.com</authorEmail>
     <authorUrl>http://joomla.rjews.net</authorUrl>
-    <version>2.7.1</version>
+    <version>3.0.3</version>
     <description>DISPLAY_NEWS_BY_BK_MODULE</description>
     <updateservers>
         <server type="extension"
                 priority="1"
-                name="Joomla.Rjews.Net">http://joomla.rjews.net/extensions.xml
+                name="Joomla.Rjews.Net">https://raw.githubusercontent.com/bkomraz1/joomla-updates/main/mod_dn.xml
         </server>
     </updateservers>
     <files>
