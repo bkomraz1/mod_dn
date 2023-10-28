@@ -9,12 +9,15 @@
 
 defined('_JEXEC') or die ('Restricted access');
 
-use Joomla\CMS\Helper\ModuleHelper;
+use Joomla\CMS\Factory;
 
-if (version_compare(JVERSION, '4.0.0', '>=')) {
+if (version_compare(JVERSION, '5.0.0', '<')) {
+if (version_compare(JVERSION, '4.0.0', '>='))
+{
     require_once JPATH_LIBRARIES . '/classmap.php';
 } else {
     require_once(JPATH_SITE . '/components/com_content/helpers/route.php');
+}
 }
 
 // loads module function file
@@ -34,9 +37,9 @@ class modDisplayNewsHelper
     var string $version = "DisplayNews by BK 3.0.3";
     var string $target = "";
     static array $shown_list = array();
-    var JApplicationSite $app;
+    var Joomla\CMS\Application\SiteApplication $app;
     var string $currcontentid;
-	var JRegistry $params;
+    var Joomla\Registry\Registry $params;
 
     function readmore_out($row, $aroute, $aparams): string
     {
@@ -1255,8 +1258,8 @@ class modDisplayNewsHelper
 
         $this->set_article_id = array_filter(array_merge((array)($this->params->get('set_article_id')),
             (array)($this->params->get('set_article_archived_id')),
-            explode(",", $this->params->get('set_article_id_extra')),
-            explode(",", $this->params->get('set_article_archived_id_extra'))));
+            explode(",", $this->params->get('set_article_id_extra') ?? ''),
+            explode(",", $this->params->get('set_article_archived_id_extra') ?? '')));
 
         // $set_author_id                  =  $this->params->get( 'set_author_id');
         // $set_author_name                =  $this->params->get( 'set_author_name');
@@ -1542,7 +1545,7 @@ class modDisplayNewsHelper
 
         if ($this->view == "article") {
             $temp = $this->app->input->getString('id');
-            $temp = explode(':', $temp);
+            $temp = explode(':', $temp ?? '');
             $this->currcontentid = $temp[0];
         }
 
@@ -2178,7 +2181,7 @@ class modDisplayNewsHelper
     function main(&$params, $module_id): string
     {
 
-        $this->app = JFactory::getApplication();
+      $this->app = Factory::getApplication();
 
         if ($this->init_params($params, $module_id) === false) {
             return "";
