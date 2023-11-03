@@ -980,8 +980,6 @@ class modDisplayNewsHelper
     function truncate($text, $length = 100, $ending = '...', $exact = true, $considerHtml = false): array
     {
 
-        require_once(JPATH_LIBRARIES . '/phputf8/utf8.php');
-
         if (utf8_strlen($ending) > $length) {
             $ending = utf8_substr($ending, 0, $length);
         }

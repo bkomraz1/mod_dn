@@ -2,7 +2,7 @@
 <extension type="module" client="site" method="upgrade">
     <name>DisplayNews</name>
     <author>BK</author>
-    <creationDate>2023-Oct-29</creationDate>
+    <creationDate>2023-Nov-03</creationDate>
     <copyright>(C) 2006 - 2023 BK. All rights reserved.</copyright>
     <license>http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL</license>
     <authorEmail>bkomraz1@gmail.com</authorEmail>
