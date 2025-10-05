@@ -1,6 +1,6 @@
 <?php
 ###################################################################################################
-#  DisplayNews  1.7.0 - Nov -2010 by bkomraz1@gmail.com
+#  DisplayNews  4.0.1 - Oct -2025 by bkomraz1@gmail.com
 #  http://joomla.rjews.net
 #  Based on Display News - Latest 1-3 [07 June 2004] by Rey Gigataras [stingrey]   www.stingrey.biz  mambo@stingrey.biz
 #  @ Released under GNU/GPL License : http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL
@@ -9,12 +9,15 @@
 
 defined('_JEXEC') or die ('Restricted access');
 
-use Joomla\CMS\Helper\ModuleHelper;
+use Joomla\CMS\Factory;
 
-if (version_compare(JVERSION, '4.0.0', '>=')) {
+if (version_compare(JVERSION, '5.0.0', '<')) {
+if (version_compare(JVERSION, '4.0.0', '>='))
+{
     require_once JPATH_LIBRARIES . '/classmap.php';
 } else {
     require_once(JPATH_SITE . '/components/com_content/helpers/route.php');
+}
 }
 
 // loads module function file
@@ -31,12 +34,13 @@ if (file_exists(JPATH_LIBRARIES . '/joomla/database/table/category.php')) {
 class modDisplayNewsHelper
 {
 
-    var string $version = "DisplayNews by BK 3.0.3";
+    var string $version = "DisplayNews by BK 4.0.1";
     var string $target = "";
     static array $shown_list = array();
-    var JApplicationSite $app;
+    var Joomla\CMS\Application\SiteApplication $app;
     var string $currcontentid;
-	var JRegistry $params;
+    var Joomla\Registry\Registry $params;
+    var $input;
 
     function readmore_out($row, $aroute, $aparams): string
     {
@@ -883,7 +887,7 @@ class modDisplayNewsHelper
 
             if ($item_id == -1) {
 //                $item_id = JRequest::getInt('Itemid');
-                $item_id = $input->getInt('Itemid');
+                $item_id = $this->input->getInt('Itemid');
             }
             $url = preg_replace('/&Itemid=[0-9]*/i', '', $url) . '&Itemid=' . $item_id;
         }
@@ -976,8 +980,6 @@ class modDisplayNewsHelper
      */
     function truncate($text, $length = 100, $ending = '...', $exact = true, $considerHtml = false): array
     {
-
-        require_once(JPATH_LIBRARIES . '/phputf8/utf8.php');
 
         if (utf8_strlen($ending) > $length) {
             $ending = utf8_substr($ending, 0, $length);
@@ -1255,8 +1257,8 @@ class modDisplayNewsHelper
 
         $this->set_article_id = array_filter(array_merge((array)($this->params->get('set_article_id')),
             (array)($this->params->get('set_article_archived_id')),
-            explode(",", $this->params->get('set_article_id_extra')),
-            explode(",", $this->params->get('set_article_archived_id_extra'))));
+            explode(",", $this->params->get('set_article_id_extra') ?? ''),
+            explode(",", $this->params->get('set_article_archived_id_extra') ?? '')));
 
         // $set_author_id                  =  $this->params->get( 'set_author_id');
         // $set_author_name                =  $this->params->get( 'set_author_name');
@@ -1398,7 +1400,7 @@ class modDisplayNewsHelper
         $this->params->def('set_column', 1);
 
 
-//        $this->view = $input->getCmd('view');
+//        $this->view = $this->input->getCmd('view');
         $this->view = 'article';
 
         $db = JFactory::getDBO();
@@ -1408,12 +1410,12 @@ class modDisplayNewsHelper
         if ($this->params->get('set_category_type') == 1) {
 
             if ($this->view == "category") {
-                $temp = $input->getString('id');
+                $temp = $this->input->getString('id');
                 $temp = explode(':', $temp);
                 $zcategoryid = $temp[0];
                 $this->set_category_id = $zcategoryid;
             } elseif ($this->view == "article") {
-                $temp = $input->getString('id');
+                $temp = $this->input->getString('id');
                 $temp = explode(':', $temp);
                 $zcontentid = $temp[0];
 
@@ -1431,12 +1433,12 @@ class modDisplayNewsHelper
 
             $this->likes = array();
 
-//            $option = $input->getCmd('option');
-             $view				= $input->getCmd('view');
+//            $option = $this->input->getCmd('option');
+             $view				= $this->input->getCmd('view');
              $view				= 'article';
 
 
-            $temp = $input->getString('id');
+            $temp = $this->input->getString('id');
             $temp = explode(':', $temp);
             $id = $temp[0];
 
@@ -1510,7 +1512,7 @@ class modDisplayNewsHelper
 			$this->params->set( 'set_author_id', -1);
 			} */
             } elseif ($this->view == "article") {
-                $temp = $input->getString('id');
+                $temp = $this->input->getString('id');
                 $temp = explode(':', $temp);
                 $zcontentid = $temp[0];
 
@@ -1542,7 +1544,7 @@ class modDisplayNewsHelper
 
         if ($this->view == "article") {
             $temp = $this->app->input->getString('id');
-            $temp = explode(':', $temp);
+            $temp = explode(':', $temp ?? '');
             $this->currcontentid = $temp[0];
         }
 
@@ -2178,7 +2180,8 @@ class modDisplayNewsHelper
     function main(&$params, $module_id): string
     {
 
-        $this->app = JFactory::getApplication();
+      $this->app = Factory::getApplication();
+      $this->input = $this->app->input;
 
         if ($this->init_params($params, $module_id) === false) {
             return "";

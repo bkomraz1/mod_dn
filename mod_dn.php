@@ -1,6 +1,6 @@
 <?php
 ###################################################################################################
-#  Display News  1.6.03 - July -2009 by bkomraz1@gmail.com
+#  Display News  4.0.1 - Oct -2025 by bkomraz1@gmail.com
 #  http://joomlacode.org/gf/project/display_news/
 #  Based on Display News - Latest 1-3 [07 June 2004] by Rey Gigataras [stingrey]   www.stingrey.biz  mambo@stingrey.biz
 #  @ Released under GNU/GPL License : http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL
