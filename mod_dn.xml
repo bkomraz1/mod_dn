@@ -2,12 +2,12 @@
 <extension type="module" client="site" method="upgrade">
     <name>DisplayNews</name>
     <author>BK</author>
-    <creationDate>2025-Oct-05</creationDate>
+    <creationDate>2025-Nov-07</creationDate>
     <copyright>(C) 2006 - 2025 BK. All rights reserved.</copyright>
     <license>http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL</license>
     <authorEmail>bkomraz1@gmail.com</authorEmail>
     <authorUrl>http://joomla.rjews.net</authorUrl>
-    <version>4.0.1</version>
+    <version>4.0.2</version>
     <description>DISPLAY_NEWS_BY_BK_MODULE</description>
     <updateservers>
         <server type="extension"

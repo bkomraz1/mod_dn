@@ -1,6 +1,6 @@
 <?php
 ###################################################################################################
-#  DisplayNews  4.0.1 - Oct -2025 by bkomraz1@gmail.com
+#  DisplayNews  4.0.2 - Oct -2025 by bkomraz1@gmail.com
 #  http://joomla.rjews.net
 #  Based on Display News - Latest 1-3 [07 June 2004] by Rey Gigataras [stingrey]   www.stingrey.biz  mambo@stingrey.biz
 #  @ Released under GNU/GPL License : http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL
@@ -34,7 +34,7 @@ if (file_exists(JPATH_LIBRARIES . '/joomla/database/table/category.php')) {
 class modDisplayNewsHelper
 {
 
-    var string $version = "DisplayNews by BK 4.0.1";
+    var string $version = "DisplayNews by BK 4.0.2";
     var string $target = "";
     static array $shown_list = array();
     var Joomla\CMS\Application\SiteApplication $app;
@@ -887,6 +887,10 @@ class modDisplayNewsHelper
 
             if ($item_id == -1) {
 //                $item_id = JRequest::getInt('Itemid');
+                if (!isset($this->input)) {
+                    $app = Factory::getApplication();
+                    $this->input = $app->input;
+                }
                 $item_id = $this->input->getInt('Itemid');
             }
             $url = preg_replace('/&Itemid=[0-9]*/i', '', $url) . '&Itemid=' . $item_id;
@@ -1187,6 +1191,14 @@ class modDisplayNewsHelper
     {
         $this->params = $params;
         $this->module_id = $module_id;
+        
+        // Ensure app and input are initialized
+        if (!isset($this->app)) {
+            $this->app = Factory::getApplication();
+        }
+        if (!isset($this->input)) {
+            $this->input = $this->app->input;
+        }
 
         global $mainframe;
 
@@ -1411,12 +1423,12 @@ class modDisplayNewsHelper
 
             if ($this->view == "category") {
                 $temp = $this->input->getString('id');
-                $temp = explode(':', $temp);
+                $temp = explode(':', $temp ?? '');
                 $zcategoryid = $temp[0];
                 $this->set_category_id = $zcategoryid;
             } elseif ($this->view == "article") {
                 $temp = $this->input->getString('id');
-                $temp = explode(':', $temp);
+                $temp = explode(':', $temp ?? '');
                 $zcontentid = $temp[0];
 
                 $temp = JTable::getInstance('content');
@@ -1433,13 +1445,13 @@ class modDisplayNewsHelper
 
             $this->likes = array();
 
-//            $option = $this->input->getCmd('option');
+            $option = $this->input->getCmd('option');
              $view				= $this->input->getCmd('view');
              $view				= 'article';
 
 
             $temp = $this->input->getString('id');
-            $temp = explode(':', $temp);
+            $temp = explode(':', $temp ?? '');
             $id = $temp[0];
 
             if ($option == 'com_content' && $this->view == 'article' && $id) {
@@ -1513,7 +1525,7 @@ class modDisplayNewsHelper
 			} */
             } elseif ($this->view == "article") {
                 $temp = $this->input->getString('id');
-                $temp = explode(':', $temp);
+                $temp = explode(':', $temp ?? '');
                 $zcontentid = $temp[0];
 
                 $result = null;
